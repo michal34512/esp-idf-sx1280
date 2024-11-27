@@ -1,58 +1,43 @@
-# devcontainer-esp-idf-clean
+# sx1280 driver for esp-idf
 
-## Installation Guide
+## Credits
+This driver is based on sx1280 library which can be found [here]( https://www.semtech.com/products/wireless-rf/lora-connect/sx1280)
 
-### Windows 10, Windows 11
+## Datarates
+Here are the data rates achieved with this library. Notice how the data rate changes based on the payload size
 
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/). Do not check *Enable integration with my default WSL distro* in settings.
+The data rate is linearly dependent on the payload size, which indicates that LoRa always transmits 256 bytes regardless of the configured payload size. After 239 bytes, a drop occurs — likely caused by a buffer overflow in LoRa (since additional data is transmitted alongside the payload). Assuming the payload is always 256 bytes, the theoretical data rate in practice is approximately 204 kbps (the manufacturer specifies 203 kbps under these settings)
+```
+Data Rate Table [bps] for a 100-byte payload:
 
-2. Install [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extenstion in VS Code. Do not check *Execute In WSL* in DEV Container: settings
+                    SF5           SF6           SF7           SF8           SF9         SF10         SF11         SF12
+Bandwidth
+BW_0200    20008.298828  13333.110352   7272.661621   4444.419922   2499.992188  1379.307983   629.920776   349.344849
+BW_0400    39998.019531  26665.787109  13333.113281   8888.791016   4999.969238  2758.611328  1249.998047   695.651550
+BW_0800    79992.085938  39998.019531  26665.787109  15999.682617   8898.678711  5333.297852  2499.992188  1379.307983
+BW_1600    79992.085938  79992.085938  39998.019531  26665.787109  15999.682617  9999.875977  4999.969238  2758.611328
+Data Rate Table [bps] for a 200-byte payload:
 
-3. Install [Ubuntu 24.04 LTS](https://apps.microsoft.com/detail/9nz3klhxdjp5?hl=pl-pl&gl=PL)
-> Note: kernel version must be higher than `5.10.60.1`, check by `uname -a` on Ubuntu or by `wsl --version` on CMD
+                     SF5           SF6           SF7           SF8           SF9          SF10         SF11         SF12
+Bandwidth
+BW_0200     22862.560547  13333.221680   7999.960449   4705.868652   2666.662354   1467.888550   669.455811   371.229614
+BW_0400     39999.007812  26666.226562  15999.841797   9411.709961   5333.315918   2909.085693  1333.332275   740.740417
+BW_0800     79996.039062  53331.574219  31999.365234  17777.582031  10006.192383   5714.265625  2666.662354  1481.480103
+BW_1600    159984.171875  79996.039062  53331.574219  31999.365234  19999.751953  11428.490234  5333.315918  2962.957520
+Data Rate Table [bps] for a 229-byte payload:
 
-4. Make Ubuntu default WSL in CMD: `wsl -l -v` and `wsl --set-default Ubuntu-24.04`
+                     SF5           SF6           SF7           SF8           SF9          SF10         SF11         SF12
+Bandwidth
+BW_0200     22947.558594  14091.223633   8326.894531   4697.315430   2694.078125   1489.418701   676.012268   374.641357
+BW_0400     45788.554688  26167.689453  16653.031250   9159.542969   5388.076660   2954.791016  1347.048950   747.752075
+BW_0800     91554.218750  45788.554688  30528.246094  18318.167969  10177.212891   5909.486816  2694.078125  1489.418701
+BW_1600    183009.671875  91554.218750  61046.316406  36632.671875  20353.294922  11449.284180  5388.076660  2954.791016
+Data Rate Table [bps] for a 230-byte payload:
 
-5. Install usbipd in CMD: `winget install usbipd`
-
-6. In Ubuntu run commands:
-- `sudo apt-get update && sudo apt-get -qqy upgrade`
-- `sudo apt install linux-tools-virtual hwdata`
-- `sudo update-alternatives --install /usr/local/bin/usbip usbip $(command -v ls /usr/lib/linux-tools/*/usbip | tail -n1) 20`
-- `sudo udevadm control --reload`
-- `sudo service udev restart`
-
-7. Plug board to computer (on devkit use UART MicroUSB port).
-
-8. In CMD run:
-- `usbipd list`
-    Look for BUSID with CP210x device and remember its `id-id`.
-
-9. Open CMD as Administrator and run:
-- `usbipd bind --busid id-id`
-
-10. In user CMD run:
-- `usbipd attach -w --busid id-id`
-
-Now device should be listed as attached:
-- `usbipd list`
-
-> Note: more advanced instructions for steps 6-10 available [here](https://github.com/dorssel/usbipd-win/wiki/WSL-support)
-
-9. Open folder in Dev Container:
-- first use: `F1` + `Dev Containers: Rebuild Without Cache and Reopen in Container`
-- further use: `F1` + `Dev Containers: Reopen in Container`
-
-10. Wait for container to setup. Reload window after setup.
-
-11. Finally run in terminal (although it is run at startup):
-- `make setup`
-
-12. See Makefile help by:
-- `make help` or just by `make`
-
-13. Steps that may help if USB Windows-WSL bridge does not work:
-- If the device is not detected first run `lsusb` to see if it pops up.
-- See if `/dev/ttyUSB0` pops up by: `ls /dev | grep USB`.
-- You may retry `make setup` or rebuild the Dev Container.
-- Rarely, you'll need to restart your computer (usually when doing this full instruction in one Windows session).
+                    SF5           SF6           SF7           SF8           SF9          SF10         SF11         SF12
+Bandwidth
+BW_0200    23047.767578  14152.757812   8363.256836   4717.827637   2666.628174   1483.859009   676.468079   374.744629
+BW_0400    45988.503906  26281.958984  16725.751953   9199.540039   5256.992676   2967.694092  1352.931274   747.964478
+BW_0800    91954.023438  45988.503906  30661.556641  18398.160156  10221.654297   5935.292480  2705.842529  1495.922729
+BW_1600    96791.164062  91954.023438  61312.894531  36792.640625  20442.173828  11499.281250  5411.605469  2967.694092
+```
